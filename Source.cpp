@@ -15,7 +15,6 @@ void startprog()
 	labirint::Point temp_p = labirint::Point(0, 0);
 	temp_p = list.read_from_file(matrix);
 
-
 	temp_m_x = temp_p.x; temp_m_y = temp_p.y;
 	temp_p.y = 0; temp_p.x = 0;
 	
@@ -24,29 +23,19 @@ void startprog()
 		if (list.check_square(matrix,&temp_p,1,0,temp_m_x,temp_m_y)) {
 			finish = list.check_and_add(temp_p.x, temp_p.y, temp_m_x, temp_m_y);
 		}
-		else if ((temp_p.y + 1 < temp_m_y) && (matrix[temp_p.x][temp_p.y + 1] == 1)) {
-			
-			finish = list.check_and_add(temp_p.x, temp_p.y + 1, temp_m_x, temp_m_y);
-			matrix[temp_p.x][temp_p.y] = 2;
-			temp_p.y += 1;
+		else if (list.check_square(matrix, &temp_p, 0, 1, temp_m_x, temp_m_y)) {
+			finish = list.check_and_add(temp_p.x, temp_p.y, temp_m_x, temp_m_y);
 		}
-		else if ((temp_p.x - 1 > -1) && (matrix[temp_p.x - 1][temp_p.y] == 1)) {
-			
-			finish = list.check_and_add(temp_p.x - 1, temp_p.y, temp_m_x, temp_m_y);
-			matrix[temp_p.x][temp_p.y] = 2;
-			temp_p.x -= 1;
+		else if (list.check_square(matrix, &temp_p, -1, 0, temp_m_x, temp_m_y)) {
+			finish = list.check_and_add(temp_p.x, temp_p.y, temp_m_x, temp_m_y);
 		}
-		else if ((temp_p.y - 1 > -1) && (matrix[temp_p.x][temp_p.y - 1] == 1)) {
-		
-			finish = list.check_and_add(temp_p.x, temp_p.y - 1, temp_m_x, temp_m_y);
-			matrix[temp_p.x][temp_p.y] = 2;
-			temp_p.y -= 1;
+		else if (list.check_square(matrix, &temp_p, 0, -1, temp_m_x, temp_m_y)) {
+			finish = list.check_and_add(temp_p.x, temp_p.y, temp_m_x, temp_m_y);
 		}
 		else {
 			
 			matrix[temp_p.x][temp_p.y] = 2;
-			no_way = list.delete_last_node();
-
+			no_way = list.delete_last_node(&temp_p);
 		}
 
 		if (finish) {
@@ -89,7 +78,6 @@ labirint::Point labirint::AWayOut::read_from_file(int (&matrix)[15][15]) {
 
 bool labirint::AWayOut::check_and_add(int x,int y,int temp_m_x,int temp_m_y)
 {
-	
 	Point* point = new Point(x, y);
 	Node* node = new Node(point);
 	if ((head == nullptr) && (tail == nullptr)) {
@@ -101,23 +89,36 @@ bool labirint::AWayOut::check_and_add(int x,int y,int temp_m_x,int temp_m_y)
 		node->prev = tail;
 		tail = node;
 	}
+
 	if ((x == temp_m_x-1) && (y == temp_m_y-1))
 		return true;
 	else
 		return false;
 }
 
-bool labirint::AWayOut::delete_last_node() {
-	
+bool labirint::AWayOut::delete_last_node(labirint::Point* point) {
+
 	if ((head == nullptr) && (tail == nullptr)) {
 		std::cout << "No way \n";
 		return true;
 	}
 	Node* temp = tail;
-	(temp->prev)->next = nullptr;
-	tail = temp->prev;
-	delete temp;
-	return false;
+	if (head == tail) {
+		delete temp;
+		point->x = 0;
+		point->y = 0;
+		head = nullptr;
+		tail = nullptr;
+		return false;
+	}
+	else {
+		point->x = tail->prev->data->x;
+		point->y = tail->prev->data->y;
+		(temp->prev)->next = nullptr;
+		tail = temp->prev;
+		delete temp;
+		return false;
+	}
 }
 
 void labirint::AWayOut::print_awayout() {
